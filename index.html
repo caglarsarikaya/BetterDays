@@ -17,12 +17,65 @@
             height: 100%;
             touch-action: none;
         }
+        #debugPanel {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-width: 300px;
+            max-height: 150px;
+            overflow: auto;
+        }
     </style>
     <!-- Add Babylon.js from CDN -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <!-- Add Babylon.js loaders for FBX -->
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script>
+        // Monitor file loading for debugging purposes
+        const originalXHROpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function() {
+            // Add an event listener for this XHR
+            this.addEventListener('load', function() {
+                if (this.readyState === 4) {
+                    if (this.status >= 200 && this.status < 300) {
+                        if (this.responseURL.includes('.fbx')) {
+                            console.log('Successfully loaded FBX:', this.responseURL);
+                            const debugPanel = document.getElementById('debugPanel');
+                            if (debugPanel) {
+                                debugPanel.innerHTML += `Loaded: ${this.responseURL.split('/').pop()}<br>`;
+                            }
+                        }
+                    } else if (this.responseURL.includes('.fbx')) {
+                        console.error('Failed to load FBX:', this.responseURL, 'Status:', this.status);
+                        const debugPanel = document.getElementById('debugPanel');
+                        if (debugPanel) {
+                            debugPanel.innerHTML += `Failed to load: ${this.responseURL.split('/').pop()} (${this.status})<br>`;
+                        }
+                    }
+                }
+            });
+            
+            originalXHROpen.apply(this, arguments);
+            
+            // Log the request URL for FBX files
+            if (arguments[1] && arguments[1].includes('.fbx')) {
+                console.log('Requesting FBX file:', arguments[1]);
+                const debugPanel = document.getElementById('debugPanel');
+                if (debugPanel) {
+                    debugPanel.innerHTML += `Requesting: ${arguments[1].split('/').pop()}<br>`;
+                }
+            }
+        };
+    </script>
 </head>
 <body>
     <canvas id="renderCanvas"></canvas>
+    <div id="debugPanel">Debug Info:<br></div>
     <script type="module">
         // Import Game class from our compiled file
         import { Game } from './dist/core/Game.js';

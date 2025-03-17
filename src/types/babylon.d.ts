@@ -31,6 +31,9 @@ declare namespace BABYLON {
         clearColor: Color4;
         activeCamera: Camera;
         onPointerObservable: Observable<PointerInfo>;
+        
+        // Animation related methods
+        beginAnimation(target: any, from: number, to: number, loop?: boolean, speedRatio?: number, onAnimationEnd?: () => void): void;
     }
 
     class Vector3 {
@@ -47,6 +50,10 @@ declare namespace BABYLON {
         subtract(otherVector: Vector3): Vector3;
         scale(scale: number): Vector3;
         addInPlace(otherVector: Vector3): Vector3;
+    }
+
+    class Color3 {
+        constructor(r: number, g: number, b: number);
     }
 
     class Color4 {
@@ -68,17 +75,58 @@ declare namespace BABYLON {
         intensity: number;
     }
 
+    class Material {
+        constructor(name: string, scene: Scene);
+    }
+
+    class StandardMaterial extends Material {
+        constructor(name: string, scene: Scene);
+        diffuseColor: Color3;
+    }
+
+    interface BoxOptions {
+        size?: number;
+        width?: number;
+        height?: number;
+        depth?: number;
+    }
+
     class Mesh {
         position: Vector3;
         rotation: Vector3;
         scaling: Vector3;
+        material: Material;
+        isVisible: boolean;
+        parent: Mesh | null;
         constructor(name: string, scene: Scene);
-        static CreateBox(name: string, options: { size: number }, scene: Scene): Mesh;
+        static CreateBox(name: string, options: BoxOptions, scene: Scene): Mesh;
+        
+        // Disposal methods
+        dispose(): void;
     }
 
     interface MeshBuilder {
-        CreateBox(name: string, options: { size: number }, scene: Scene): Mesh;
+        CreateBox(name: string, options: BoxOptions, scene: Scene): Mesh;
     }
 
     const MeshBuilder: MeshBuilder;
+
+    interface RegisteredPlugin {
+        plugin: any;
+        isBinary: boolean;
+    }
+
+    class SceneLoader {
+        static ImportMesh(
+            meshNames: string | string[] | null, 
+            rootUrl: string, 
+            sceneFilename: string, 
+            scene: Scene, 
+            onSuccess?: (meshes: Mesh[], particleSystems: any[], skeletons: any[]) => void, 
+            onProgress?: ((event: ProgressEvent) => void) | undefined, 
+            onError?: (scene: Scene, message: string, exception?: any) => void
+        ): void;
+        
+        static RegisteredPlugins?: { [extension: string]: RegisteredPlugin };
+    }
 } 

@@ -8,9 +8,9 @@
  * functionality in a single class.
  */
 
-// Import the InputManager and TempCharacter
+// Import the InputManager and Archer
 import { InputManager } from '../input/InputManager.js';
-import { TempCharacter } from '../characters/TempCharacter.js';
+import { Archer } from '../characters/Archer.js';
 
 /**
  * Main Game class that manages the core game loop and scene setup
@@ -19,7 +19,7 @@ export class Game {
     private engine: BABYLON.Engine;
     private scene: BABYLON.Scene;
     private inputManager: InputManager;
-    private character: TempCharacter;
+    private character: Archer;
     
     /**
      * Constructor initializes the game engine, scene, and render loop
@@ -44,8 +44,11 @@ export class Game {
         // Add basic light
         this.createLight();
         
-        // Create the character
-        this.character = new TempCharacter(this.scene);
+        // Register FBX plugin if needed
+        this.registerPlugins();
+        
+        // Create the archer character
+        this.character = new Archer(this.scene);
         
         // Add camera that follows the character
         this.createCamera(canvas);
@@ -63,12 +66,29 @@ export class Game {
     }
     
     /**
+     * Register plugins required for the game
+     */
+    private registerPlugins(): void {
+        // Check if SceneLoader is defined before trying to use it
+        if (BABYLON && BABYLON.SceneLoader) {
+            // Log what file extensions are supported
+            console.log("Supported file extensions:", 
+                BABYLON.SceneLoader.RegisteredPlugins ? 
+                Object.keys(BABYLON.SceneLoader.RegisteredPlugins) : 
+                "No registered plugins found");
+        } else {
+            console.error("BABYLON.SceneLoader is not available. Make sure the loaders script is included.");
+        }
+    }
+    
+    /**
      * Creates a camera for the scene that follows the character
      * @param canvas The HTML canvas element for camera controls
      */
     private createCamera(canvas: HTMLCanvasElement): void {
-        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), this.scene);
-        camera.setTarget(BABYLON.Vector3.Zero());
+        // Position the camera to view the character model better
+        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 1.7, -5), this.scene);
+        camera.setTarget(new BABYLON.Vector3(0, 1, 0)); // Look slightly upward to the character's head
         camera.attachControl(canvas, true);
     }
     
@@ -76,8 +96,13 @@ export class Game {
      * Creates basic lighting for the scene
      */
     private createLight(): void {
+        // Main directional light (like the sun)
         const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), this.scene);
         light.intensity = 0.7;
+        
+        // Add a secondary light from the front to better illuminate the character
+        const frontLight = new BABYLON.HemisphericLight('frontLight', new BABYLON.Vector3(0, 0, 1), this.scene);
+        frontLight.intensity = 0.3;
     }
     
     /**
@@ -88,6 +113,11 @@ export class Game {
         const ground = BABYLON.MeshBuilder.CreateBox('ground', { size: 20 }, this.scene);
         ground.scaling.y = 0.1;
         ground.position.y = -0.05;
+        
+        // Give ground a material
+        const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', this.scene);
+        groundMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5); // Gray
+        ground.material = groundMaterial;
     }
     
     /**
@@ -108,6 +138,11 @@ export class Game {
         this.engine.runRenderLoop(() => {
             // Update character
             this.character.update(this.inputManager);
+            
+            // Display aiming status
+            if (this.character.isInAimingMode()) {
+                console.log('Archer is in aiming mode - ready to fire');
+            }
             
             // Render the scene
             this.scene.render();
