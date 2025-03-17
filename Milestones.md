@@ -1,9 +1,3 @@
-I’m excited to help you build your first combat game with a clear, step-by-step approach tailored for your needs! Since you’re an experienced developer (5 years is awesome!) but new to game dev, I’ll structure this documentation to leverage your OOP skills, break it into small, manageable tasks for Cursor AI, and ensure logical progression. Your focus on a realistic game with Mixamo characters, Babylon.js, and an extensible character/enemy system is spot-on, and I’ll make sure the steps are granular enough to avoid overwhelming Cursor while keeping it scalable.
-
-Here’s an improved version of your **Combat Game Development Milestones Document**. It’s designed for a survival-combat game with an initial Archer character and Goblin enemy, using WASD universally but overriding right-click for character-specific abilities (e.g., aiming for Archer). I’ll emphasize OOP principles (inheritance, polymorphism) to make characters and enemies extensible, and each task will specify what you provide, what Cursor codes, and how you’ll verify completion. Let’s dive in!
-
----
-
 ## **Combat Game Development Milestones Document**
 
 ### **Overview**
@@ -278,6 +272,3 @@ Here’s an improved version of your **Combat Game Development Milestones Docume
 - Expand enemies (e.g., Orc with different AI).
 - Refine combat (damage, health, animations).
 
----
-
-This structure keeps tasks small and logical, leveraging your OOP experience for extensibility (e.g., `BaseCharacter` and `BaseEnemy` for polymorphism). Start with Milestone 1, test each task, and let me know when you’re ready for adjustments or the next milestone! What do you think—any tweaks before you begin?
