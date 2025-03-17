@@ -6,14 +6,25 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "serve": "http-server -o",
+    "serve": "http-server -c-1",
     "dev": "concurrently \"npm run watch\" \"npm run serve\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["game", "babylonjs", "typescript", "3d", "combat"],
+  "keywords": [
+    "game",
+    "babylonjs",
+    "typescript",
+    "3d",
+    "combat"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "concurrently": "^9.1.2",
+    "http-server": "^14.1.1",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^7.53.3"
   }
 }
