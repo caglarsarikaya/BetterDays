@@ -10,11 +10,27 @@ declare namespace BABYLON {
         resize(): void;
     }
 
+    enum PointerEventTypes {
+        POINTERDOWN,
+        POINTERUP,
+        POINTERMOVE
+    }
+
+    interface PointerInfo {
+        type: PointerEventTypes;
+        event: PointerEvent;
+    }
+
+    class Observable<T> {
+        add(callback: (eventData: T) => void): void;
+    }
+
     class Scene {
         constructor(engine: Engine);
         render(): void;
         clearColor: Color4;
         activeCamera: Camera;
+        onPointerObservable: Observable<PointerInfo>;
     }
 
     class Vector3 {
@@ -27,6 +43,10 @@ declare namespace BABYLON {
         
         length(): number;
         normalize(): Vector3;
+        add(otherVector: Vector3): Vector3;
+        subtract(otherVector: Vector3): Vector3;
+        scale(scale: number): Vector3;
+        addInPlace(otherVector: Vector3): Vector3;
     }
 
     class Color4 {
@@ -47,4 +67,18 @@ declare namespace BABYLON {
         constructor(name: string, direction: Vector3, scene: Scene);
         intensity: number;
     }
+
+    class Mesh {
+        position: Vector3;
+        rotation: Vector3;
+        scaling: Vector3;
+        constructor(name: string, scene: Scene);
+        static CreateBox(name: string, options: { size: number }, scene: Scene): Mesh;
+    }
+
+    interface MeshBuilder {
+        CreateBox(name: string, options: { size: number }, scene: Scene): Mesh;
+    }
+
+    const MeshBuilder: MeshBuilder;
 } 

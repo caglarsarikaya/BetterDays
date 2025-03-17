@@ -8,8 +8,9 @@
  * functionality in a single class.
  */
 
-// Import the InputManager
+// Import the InputManager and TempCharacter
 import { InputManager } from '../input/InputManager.js';
+import { TempCharacter } from '../characters/TempCharacter.js';
 
 /**
  * Main Game class that manages the core game loop and scene setup
@@ -18,6 +19,7 @@ export class Game {
     private engine: BABYLON.Engine;
     private scene: BABYLON.Scene;
     private inputManager: InputManager;
+    private character: TempCharacter;
     
     /**
      * Constructor initializes the game engine, scene, and render loop
@@ -36,14 +38,20 @@ export class Game {
         // Initialize input manager
         this.inputManager = new InputManager();
         
-        // Add basic camera for development
-        this.createCamera(canvas);
+        // Create a temporary ground for the character to stand on
+        this.createGround();
         
         // Add basic light
         this.createLight();
         
-        // Add a placeholder cube to demonstrate WASD movement
-        this.createDemoBox();
+        // Create the character
+        this.character = new TempCharacter(this.scene);
+        
+        // Add camera that follows the character
+        this.createCamera(canvas);
+        
+        // Setup right-click handling
+        this.setupRightClickHandler();
         
         // Start the render loop
         this.startRenderLoop();
@@ -55,7 +63,7 @@ export class Game {
     }
     
     /**
-     * Creates a camera for the scene
+     * Creates a camera for the scene that follows the character
      * @param canvas The HTML canvas element for camera controls
      */
     private createCamera(canvas: HTMLCanvasElement): void {
@@ -73,12 +81,24 @@ export class Game {
     }
     
     /**
-     * Creates a demo box to demonstrate WASD movement
+     * Creates a temporary ground for the character to stand on
      */
-    private createDemoBox(): void {
-        // For the demo, we'll need to add the Box definition to our babylon.d.ts file
-        // But for now, we'll just console log that this would create a box
-        console.log('Demo box would be created here - will be expanded in future tasks');
+    private createGround(): void {
+        // For the demo, we'll just create a simple ground
+        const ground = BABYLON.MeshBuilder.CreateBox('ground', { size: 20 }, this.scene);
+        ground.scaling.y = 0.1;
+        ground.position.y = -0.05;
+    }
+    
+    /**
+     * Sets up event listener for right-click to trigger character's ability
+     */
+    private setupRightClickHandler(): void {
+        this.scene.onPointerObservable.add((pointerInfo) => {
+            if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERDOWN && pointerInfo.event.button === 2) {
+                this.character.onRightClick();
+            }
+        });
     }
     
     /**
@@ -86,9 +106,8 @@ export class Game {
      */
     private startRenderLoop(): void {
         this.engine.runRenderLoop(() => {
-            // Process input
-            const movementDir = this.inputManager.getMovementDirection();
-            console.log(`Movement direction: x=${movementDir.x}, z=${movementDir.z}`);
+            // Update character
+            this.character.update(this.inputManager);
             
             // Render the scene
             this.scene.render();
