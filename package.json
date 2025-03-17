@@ -1,0 +1,19 @@
+{
+  "name": "betterdays",
+  "version": "1.0.0",
+  "description": "Below is a well-structured **README.md** file tailored for your combat game project. It provides an overview, setup instructions, and a reference to your milestones document, making it easy to onboard yourself (or others) and track progress. Since you're coding with Cursor AI, I've kept it concise and developer-friendly, assuming you'll use it as a quick reference while working through the milestones.",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "serve": "http-server -o",
+    "dev": "concurrently \"npm run watch\" \"npm run serve\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["game", "babylonjs", "typescript", "3d", "combat"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
