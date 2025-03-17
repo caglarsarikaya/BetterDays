@@ -18,9 +18,24 @@
             touch-action: none;
         }
     </style>
+    <!-- Add Babylon.js from CDN -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
 </head>
 <body>
     <canvas id="renderCanvas"></canvas>
-    <script type="module" src="dist/main.js"></script>
+    <script type="module">
+        // Import Game class from our compiled file
+        import { Game } from './dist/core/Game.js';
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            // Get the canvas element from the DOM
+            const canvas = document.getElementById('renderCanvas');
+            
+            // Initialize the game
+            const game = new Game(canvas);
+            
+            console.log('BetterDays game initialized successfully');
+        });
+    </script>
 </body>
 </html> 
