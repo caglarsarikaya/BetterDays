@@ -32,6 +32,12 @@ declare namespace BABYLON {
         activeCamera: Camera;
         onPointerObservable: Observable<PointerInfo>;
         
+        // Mesh management
+        meshes: Mesh[];
+        
+        // Animation related properties
+        animationGroups: AnimationGroup[];
+        
         // Animation related methods
         beginAnimation(target: any, from: number, to: number, loop?: boolean, speedRatio?: number, onAnimationEnd?: () => void): void;
     }
@@ -54,6 +60,9 @@ declare namespace BABYLON {
 
     class Color3 {
         constructor(r: number, g: number, b: number);
+        r: number;
+        g: number;
+        b: number;
     }
 
     class Color4 {
@@ -91,6 +100,11 @@ declare namespace BABYLON {
         depth?: number;
     }
 
+    interface GroundOptions {
+        width?: number;
+        height?: number;
+    }
+
     class Mesh {
         position: Vector3;
         rotation: Vector3;
@@ -98,6 +112,7 @@ declare namespace BABYLON {
         material: Material;
         isVisible: boolean;
         parent: Mesh | null;
+        name: string;
         constructor(name: string, scene: Scene);
         static CreateBox(name: string, options: BoxOptions, scene: Scene): Mesh;
         
@@ -107,6 +122,7 @@ declare namespace BABYLON {
 
     interface MeshBuilder {
         CreateBox(name: string, options: BoxOptions, scene: Scene): Mesh;
+        CreateGround(name: string, options: GroundOptions, scene: Scene): Mesh;
     }
 
     const MeshBuilder: MeshBuilder;
@@ -116,6 +132,24 @@ declare namespace BABYLON {
         isBinary: boolean;
     }
 
+    /**
+     * Represents an animation group that can be played or stopped
+     */
+    class AnimationGroup {
+        name: string;
+        
+        /**
+         * Start the animation group
+         * @param loop Whether the animation should loop
+         */
+        start(loop?: boolean): void;
+        
+        /**
+         * Stop the animation group
+         */
+        stop(): void;
+    }
+
     class SceneLoader {
         static ImportMesh(
             meshNames: string | string[] | null, 
@@ -123,7 +157,17 @@ declare namespace BABYLON {
             sceneFilename: string, 
             scene: Scene, 
             onSuccess?: (meshes: Mesh[], particleSystems: any[], skeletons: any[]) => void, 
-            onProgress?: ((event: ProgressEvent) => void) | undefined, 
+            onProgress?: (event: { loaded: number; total: number }) => void, 
+            onError?: (scene: Scene, message: string, exception?: any) => void
+        ): void;
+        
+        static ImportAnimations(
+            rootUrl: string,
+            sceneFilename: string,
+            scene: Scene,
+            overwriteAnimations: boolean,
+            extension?: string,
+            onSuccess?: (scene: Scene) => void,
             onError?: (scene: Scene, message: string, exception?: any) => void
         ): void;
         

@@ -56,6 +56,9 @@ export class Game {
         // Setup right-click handling
         this.setupRightClickHandler();
         
+        // Clean up any debug objects
+        this.cleanupDebugObjects();
+        
         // Start the render loop
         this.startRenderLoop();
         
@@ -87,8 +90,8 @@ export class Game {
      */
     private createCamera(canvas: HTMLCanvasElement): void {
         // Position the camera to view the character model better
-        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 1.7, -5), this.scene);
-        camera.setTarget(new BABYLON.Vector3(0, 1, 0)); // Look slightly upward to the character's head
+        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 2, -5), this.scene);
+        camera.setTarget(new BABYLON.Vector3(0, 1.5, 0)); // Look at character's upper body
         camera.attachControl(canvas, true);
     }
     
@@ -110,14 +113,80 @@ export class Game {
      */
     private createGround(): void {
         // For the demo, we'll just create a simple ground
-        const ground = BABYLON.MeshBuilder.CreateBox('ground', { size: 20 }, this.scene);
-        ground.scaling.y = 0.1;
-        ground.position.y = -0.05;
+        const ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 20, height: 20 }, this.scene);
+        ground.position.y = 0; // Position the ground at y=0
         
         // Give ground a material
         const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', this.scene);
         groundMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5); // Gray
         ground.material = groundMaterial;
+    }
+    
+    /**
+     * Clean up any debug objects in the scene
+     */
+    private cleanupDebugObjects(): void {
+        // Find all meshes in the scene
+        if (this.scene.meshes) {
+            // Log all mesh names to help identify unwanted objects
+            console.log("All meshes in scene:", this.scene.meshes.map(mesh => mesh.name));
+            
+            // Dispose of any player boxes that might be leftover from previous code
+            const meshesToRemove = this.scene.meshes.filter(mesh => {
+                // Skip the ground and the main character
+                if (mesh.name === 'ground' || mesh === this.character.getMesh()) {
+                    return false;
+                }
+                
+                // Check for known debug object names
+                return mesh.name === 'player' ||
+                       // Box model parts
+                       mesh.name.includes('archerBody') ||
+                       mesh.name.includes('archerHead') ||
+                       mesh.name.includes('archerLeftArm') ||
+                       mesh.name.includes('archerRightArm') ||
+                       mesh.name.includes('archerLeftLeg') ||
+                       mesh.name.includes('archerRightLeg') ||
+                       mesh.name.includes('archerParent') ||
+                       // Other debug objects
+                       mesh.name.includes('TempCharacter') || 
+                       mesh.name.includes('temp') ||
+                       (mesh.name.includes('demo') && !mesh.name.includes('ground')) ||
+                       mesh.name.includes('debug') ||
+                       mesh.name === 'cube' ||
+                       // Green box detection (likely our mystery character)
+                       (mesh.material && 
+                        mesh.material instanceof BABYLON.StandardMaterial && 
+                        (mesh.material as BABYLON.StandardMaterial).diffuseColor.g > 0.3 &&
+                        (mesh.material as BABYLON.StandardMaterial).diffuseColor.r < 0.2);
+            });
+            
+            // Dispose of each mesh
+            meshesToRemove.forEach(mesh => {
+                console.log(`Removing debug object: ${mesh.name}`);
+                mesh.dispose();
+            });
+            
+            console.log(`Cleaned up ${meshesToRemove.length} debug objects`);
+            
+            // Do a second sweep to find any orphaned parts by position (they tend to be grouped together)
+            const potentialDebugObjects = this.scene.meshes.filter(mesh => {
+                // Skip ground and main character
+                if (mesh.name === 'ground' || mesh === this.character.getMesh()) {
+                    return false;
+                }
+                
+                // Look for objects positioned near where we saw the green character
+                const pos = mesh.position;
+                // The green character is typically positioned away from our main character
+                return pos.x > 1 || pos.x < -1; // If it's not near the center line where our character is
+            });
+            
+            potentialDebugObjects.forEach(mesh => {
+                console.log(`Removing likely debug object by position: ${mesh.name} at position ${mesh.position.x}, ${mesh.position.y}, ${mesh.position.z}`);
+                mesh.dispose();
+            });
+        }
     }
     
     /**
